@@ -6,7 +6,8 @@ import numpy as np
 X = np.array([[0.05, 0.10]])
 target = np.array([[0.01, 0.99]])
 
-model = FFNN.FFNN([2, 2, 2], X, target, 0.5, Activation.sigmoid)
+model = FFNN.FFNN([2, 2, 2], X, target, 0.5)
+model.setActivationUniform(Activation.sigmoid)
 model.initializeWeightZeros()
 
 for i in range(10000):

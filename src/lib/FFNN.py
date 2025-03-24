@@ -5,18 +5,24 @@ import numpy as np
 class FFNN:
     # Static attributes
 
-    def __init__(self, layer_neurons, input, target, learning_rate, activation_function):
+    def __init__(self, layer_neurons, input, target, learning_rate, activation_functions=None):
         self.layer_neurons = layer_neurons
         self.input = input
         self.target = target
         self.learning_rate = learning_rate
-        self.activation = activation_function
+        self.activations = activation_functions
+
+        if activation_functions != None and len(activation_functions) != len(layer_neurons):
+            raise ValueError("Number of activation functions must match number of layers")
 
         # For weight initialization
         self.sizes = [(self.layer_neurons[i] + 1, self.layer_neurons[i + 1]) for i in range(len(self.layer_neurons) - 1)]
     
     def setLearningRate(self, learning_rate):
         self.learning_rate = learning_rate
+
+    def setActivationUniform(self, activation_function):
+        self.activations = [activation_function for i in range(len(self.layer_neurons))]
 
     def setWeights(self, weights):
         self.weights = weights
@@ -45,7 +51,8 @@ class FFNN:
             self.layer_results_before_activation.append(initial_result)
 
             # Apply activation function to result
-            result = self.activation(initial_result)
+            activation = self.activations[i]
+            result = activation(initial_result)
             self.layer_results.append(result)
 
             # Change input to result

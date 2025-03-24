@@ -17,7 +17,8 @@ network = [
 ]
 target = np.array([[2]])
 
-model = FFNN.FFNN([2, 2, 1], X, target, 0.5, Activation.relu)
+model = FFNN.FFNN([2, 2, 1], X, target, 0.5)
+model.setActivationUniform(Activation.sigmoid)
 model.setWeights(network)
 model.FFNNForwardPropagation()
 
