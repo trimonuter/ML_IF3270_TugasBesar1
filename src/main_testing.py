@@ -1,0 +1,32 @@
+from lib import FFNN
+from lib import matrix as Matrix
+import numpy as np
+
+X = np.array([[0.05, 0.10]])
+network = [
+    np.array(
+        [[0.35, 0.35],
+        [0.15, 0.25],
+        [0.20, 0.30]]),
+    np.array(
+        [[0.60, 0.60],
+        [0.40, 0.50],
+        [0.45, 0.55]]),
+]
+target = np.array([[0.01, 0.99]])
+
+model = FFNN.FFNN(X, network, target)
+model.FFNNForwardPropagation()
+
+print(f'Layer_inputs: {model.layer_results}')
+print(f'Layer_outputs: {[Matrix.addBiasColumn(x) for x in model.layer_results]}')
+print('Weights (before backpropagation)')
+for i , W in enumerate(model.weights):
+    print(f'Layer {i + 1}')
+    print(np.array2string(W) + '\n')
+
+model.FFNNBackPropagation()
+print('Weights (after backpropagation)')
+for i , W in enumerate(model.weights):
+    print(f'Layer {i + 1}')
+    print(np.array2string(W) + '\n')
