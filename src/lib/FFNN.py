@@ -3,17 +3,36 @@ from lib import activation as Activation
 import numpy as np
 
 class FFNN:
-    def __init__(self, input, target, activation_function):
+    # Static attributes
+
+    def __init__(self, layer_neurons, input, target, learning_rate, activation_function):
+        self.layer_neurons = layer_neurons
         self.input = input
         self.target = target
-        self.learning_rate = 0.5
+        self.learning_rate = learning_rate
         self.activation = activation_function
+
+        # For weight initialization
+        self.sizes = [(self.layer_neurons[i] + 1, self.layer_neurons[i + 1]) for i in range(len(self.layer_neurons) - 1)]
     
     def setLearningRate(self, learning_rate):
         self.learning_rate = learning_rate
 
     def setWeights(self, weights):
         self.weights = weights
+
+    def initializeWeightZeros(self):
+        self.weights = [np.zeros(size) for size in self.sizes]
+
+    def initializeWeightRandomUniform(self, lower_bound, upper_bound, seed=None):
+        if seed != None:
+            np.random.seed(seed)
+        self.weights = [np.random.uniform(lower_bound, upper_bound, size) for size in self.sizes]
+
+    def initializeWeightRandomNormal(self, mean, variance, seed=None):
+        if seed != None:
+            np.random.seed(seed)
+        self.weights = [np.random.normal(mean, variance, size) for size in self.sizes]
 
     def FFNNForwardPropagation(self):
         self.layer_results = [self.input]
@@ -45,28 +64,25 @@ class FFNN:
 
         for i in range(n, 0, -1):
             # Calculate delta matrix
-            output = self.layer_results[i]                                                           # Output (Oj) matrix
+            output = self.layer_results[i]                                  # Output (Oj) matrix
 
             if i == n:
                 # Output layer
                 delta = (self.target - output) * (output * (1 - output))
             else:
                 # Hidden layer
-                weight_ds = Matrix.removeBiasRow(self.weights[i])                      # Downstream weight (Wkj) matrix
-                delta_ds = deltas[0]                                                                        # Downstream delta (delta_k) matrix
+                weight_ds = Matrix.removeBiasRow(self.weights[i])           # Downstream weight (Wkj) matrix
+                delta_ds = deltas[0]                                        # Downstream delta (delta_k) matrix
 
                 delta = (output * (1 - output)) * (np.matmul(delta_ds, np.transpose(weight_ds)))
 
             deltas = [delta] + deltas
 
             # Calculate new weights
-            layer_input = Matrix.addBiasColumn(self.layer_results[i - 1])         # Input (Xji) matrix
+            layer_input = Matrix.addBiasColumn(self.layer_results[i - 1])   # Input (Xji) matrix
             weight_change = self.learning_rate * (np.matmul(np.transpose(layer_input), delta))      # delta_w (n * delta_j * xji)
 
             delta_weights = [weight_change] + delta_weights
-
-            # Update old weights
-            # self.weights[i - 1] += weight_change
 
         # Update old weights after backpropagation has finished
         for i, weight_change in enumerate(delta_weights):

@@ -3,22 +3,22 @@ from lib import matrix as Matrix
 from lib import activation as Activation
 import numpy as np
 
-X = np.array([[0.05, 0.10]])
+X = np.array([[1, 0]])
 network = [
     np.array(
-        [[0.35, 0.35],
-        [0.15, 0.25],
-        [0.20, 0.30]]),
+        [[0.5, 0],
+        [1, 0.5],
+        [1, 0.5]]),
     np.array(
-        [[0.60, 0.60],
-        [0.40, 0.50],
-        [0.45, 0.55]]),
+        [[0.5],
+        [1],
+        [1]]
+    ),
 ]
-target = np.array([[0.01, 0.99]])
+target = np.array([[2]])
 
-model = FFNN.FFNN(X, target, Activation.tanh)
+model = FFNN.FFNN([2, 2, 1], X, target, 0.5, Activation.relu)
 model.setWeights(network)
-
 model.FFNNForwardPropagation()
 
 print(f'Layer inputs before activation: {model.layer_results_before_activation}')
