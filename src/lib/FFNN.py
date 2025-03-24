@@ -75,13 +75,13 @@ class FFNN:
 
             if i == n:
                 # Output layer
-                delta = (self.target - output) * (output * (1 - output))
+                delta = (self.target - output) * Activation.getDerivativeMatrix(self.activations[i], output)
             else:
                 # Hidden layer
                 weight_ds = Matrix.removeBiasRow(self.weights[i])           # Downstream weight (Wkj) matrix
                 delta_ds = deltas[0]                                        # Downstream delta (delta_k) matrix
 
-                delta = (output * (1 - output)) * (np.matmul(delta_ds, np.transpose(weight_ds)))
+                delta = Activation.getDerivativeMatrix(self.activations[i], output) * (np.matmul(delta_ds, np.transpose(weight_ds)))
 
             deltas = [delta] + deltas
 
