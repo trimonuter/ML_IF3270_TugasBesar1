@@ -3,24 +3,31 @@ from lib import activation as Activation
 import numpy as np
 
 class FFNN:
-    def __init__(self, input, weights, target):
+    def __init__(self, input, target, activation_function):
         self.input = input
-        self.weights = weights
         self.target = target
         self.learning_rate = 0.5
+        self.activation = activation_function
+    
+    def setLearningRate(self, learning_rate):
+        self.learning_rate = learning_rate
+
+    def setWeights(self, weights):
+        self.weights = weights
 
     def FFNNForwardPropagation(self):
         self.layer_results = [self.input]
+        self.layer_results_before_activation = [self.input]
         input = Matrix.addBiasColumn(self.input)
         i = 1
         for layer in self.weights:
             # Get layer result
             initial_result = np.matmul(input, layer)
+            self.layer_results_before_activation.append(initial_result)
 
             # Apply activation function to result
-            result = Activation.sigmoid(initial_result)
+            result = self.activation(initial_result)
             self.layer_results.append(result)
-            print(f'Layer {i}: {result}')
 
             # Change input to result
             biased_result = Matrix.addBiasColumn(result)
