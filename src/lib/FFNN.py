@@ -7,7 +7,7 @@ import numpy as np
 class FFNN:
     # Static attributes
 
-    def __init__(self, layer_neurons, X_train, y_train, learning_rate, activation_functions=None, X_val=None, y_val=None):
+    def __init__(self, layer_neurons, X_train, y_train, X_val, y_val, learning_rate, activation_functions=None):
         self.layer_neurons = layer_neurons
         self.input = X_train
         self.target = y_train
@@ -128,10 +128,9 @@ class FFNN:
             training_loss /= len(self.input)
             training_loss_list.append(training_loss)
 
-            if self.X_val != None and self.y_val != None:
-                self.FFNNForwardPropagation(self.X_val)
-                validation_loss = Loss.mse(self.y_val, self.layer_results[-1])
-                validation_loss_list.append(validation_loss)
+            self.FFNNForwardPropagation(self.X_val)
+            validation_loss = Loss.mse(self.y_val, self.layer_results[-1])
+            validation_loss_list.append(validation_loss)
 
             # Print epoch results
             if verbose:
