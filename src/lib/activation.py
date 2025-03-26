@@ -20,6 +20,10 @@ def sigmoid(x):
 def tanh(x):
     return np.tanh(x)
 
+@np.vectorize
+def derivative_tanh(x):
+    return (2 / (np.exp(x) + np.exp(-x))) ** 2
+
 # Softmax
 def softmax(x):
     pass
@@ -33,7 +37,7 @@ def getDerivativeMatrix(activation, matrix):
     elif activation == sigmoid:
         return matrix * (1 - matrix)
     elif activation == tanh:
-        return 1 - matrix ** 2
+        return derivative_tanh(matrix)
     elif activation == softmax:
         pass
     else:

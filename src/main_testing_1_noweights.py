@@ -7,10 +7,10 @@ X = np.array([[0.05, 0.10]])
 target = np.array([[0.01, 0.99]])
 
 model = FFNN.FFNN([2, 2, 2], X, target, 0.5)
-model.setActivationUniform(Activation.linear)
+model.setActivationUniform(Activation.tanh)
 model.initializeWeightRandomUniform(-1, 1)
 
-for i in range(1000):
+for i in range(500):
     model.FFNNForwardPropagation()
     
     print(f'Epoch {i+1} Prediction:')
