@@ -3,6 +3,10 @@ from lib import activation as Activation
 from lib import loss as Loss
 from lib import color as Color
 import numpy as np
+import networkx as nx
+import matplotlib.pyplot as plt
+import dill as pickle
+import os
 
 class FFNN:
     # Static attributes
