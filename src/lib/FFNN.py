@@ -135,9 +135,10 @@ class FFNN:
 
             # Print epoch results
             if verbose:
-                print(Color.YELLOW + f"[Epoch {epoch + 1}]:" + Color.GREEN + f" Training Loss: {training_loss}" + Color.BLUE + f" Validation Loss: {validation_loss}" + Color.RESET)
+                progress_bar = Color.progress_bar(epoch + 1, epochs)
+                print(Color.YELLOW + f" [Epoch {epoch + 1}]:" + Color.GREEN + f"\tTraining Loss: {training_loss}" + Color.BLUE + f"\tValidation Loss: {validation_loss}" + Color.YELLOW + f'\tProgress: [{progress_bar}]' + Color.RESET)
                 if printResults:
-                    print(f"{Color.CYAN}     Prediction: {self.layer_results[-1]}")
-                    print(f"{Color.MAGENTA}     Target: {self.target}{Color.RESET}")
+                    print(f"{Color.CYAN}     Prediction:\t{self.layer_results[-1]}")
+                    print(f"{Color.MAGENTA}     Target:\t\t{self.target}{Color.RESET}")
 
         return training_loss_list, validation_loss_list

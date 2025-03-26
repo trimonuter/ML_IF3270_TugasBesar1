@@ -13,3 +13,9 @@ BLUE = "\033[34m"
 MAGENTA = "\033[35m"
 CYAN = "\033[36m"
 WHITE = "\033[37m"
+
+def progress_bar(progress, total, length=20):
+    percent = progress / total
+    bar = "█" * int(length * percent) + " " * (length - int(length * percent))
+
+    return bar

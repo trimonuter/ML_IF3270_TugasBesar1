@@ -20,4 +20,4 @@ model = FFNN.FFNN([2, 2, 2], X, target, 0.5)
 model.setActivationUniform(Activation.sigmoid)
 model.setWeights(network)
 
-model.train(batch_size=32, learning_rate=model.learning_rate, epochs=500, printResults=True)
+model.train(batch_size=32, learning_rate=model.learning_rate, epochs=1000, printResults=True)
