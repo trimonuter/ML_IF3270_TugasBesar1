@@ -94,3 +94,5 @@ class FFNN:
         # Update old weights after backpropagation has finished
         for i, weight_change in enumerate(delta_weights):
             self.weights[i] += weight_change
+
+    

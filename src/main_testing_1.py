@@ -1,6 +1,7 @@
 from lib import FFNN
 from lib import matrix as Matrix
 from lib import activation as Activation
+from lib import loss as Loss
 import numpy as np
 
 network = [
@@ -35,3 +36,5 @@ print('Weights (after backpropagation)')
 for i , W in enumerate(model.weights):
     print(f'Layer {i + 1}')
     print(np.array2string(W) + '\n')
+
+print(f'Loss: {Loss.mse(model.target, model.layer_results[-1])}')
