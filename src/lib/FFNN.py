@@ -141,3 +141,109 @@ class FFNN:
                     print(f"{Color.MAGENTA}     Target:\t\t{self.target}{Color.RESET}")
 
         return training_loss_list, validation_loss_list
+
+    def printGraph(self):
+        G = nx.DiGraph()
+        positions = {}
+        node_colors = {}
+
+        layer_spacing = 3
+        neuron_spacing = 1.5
+
+        num_layers = len(self.layer_neurons)
+        max_neurons = max(self.layer_neurons)
+
+        fig_width = layer_spacing * num_layers * 1.2
+        fig_height = max_neurons * neuron_spacing * 1.5
+
+        for layer_idx, num_neurons in enumerate(self.layer_neurons):
+            y_start = -(num_neurons - 1) * neuron_spacing / 2
+
+            for i in range(num_neurons):
+                if layer_idx == 0:
+                    node_name = f"I{i+1}"
+                    color = "lightgreen"
+                elif layer_idx == num_layers - 1:
+                    node_name = f"O{i+1}"
+                    color = "yellow"
+                else:
+                    node_name = f"H{layer_idx}{i+1}"
+                    color = "lightblue"
+
+                G.add_node(node_name)
+                positions[node_name] = (layer_idx * layer_spacing, y_start + i * neuron_spacing)
+                node_colors[node_name] = color
+
+            if layer_idx < num_layers - 1:
+                bias_node = f"B{layer_idx+1}"
+                G.add_node(bias_node)
+                positions[bias_node] = (layer_idx * layer_spacing, y_start - neuron_spacing)
+                node_colors[bias_node] = "lightgray"
+
+        edge_labels = {}
+        for layer_idx, weight_matrix in enumerate(self.weights):
+            for src in range(len(weight_matrix) - 1):
+                for dest in range(weight_matrix.shape[1]):
+                    src_node = (
+                        f"i{src+1}" if layer_idx == 0 else f"h{layer_idx}{src+1}"
+                    )
+                    dest_node = (
+                        f"h{layer_idx+1}{dest+1}" if layer_idx + 1 < num_layers - 1 else f"o{dest+1}"
+                    )
+                    weight = weight_matrix[src + 1, dest]
+                    G.add_edge(src_node, dest_node, weight=weight)
+                    edge_labels[(src_node, dest_node)] = f"{weight:.2f}"
+
+            for dest in range(weight_matrix.shape[1]):
+                bias_node = f"b{layer_idx+1}"
+                dest_node = (
+                    f"h{layer_idx+1}{dest+1}" if layer_idx + 1 < num_layers - 1 else f"o{dest+1}"
+                )
+                weight = weight_matrix[0, dest]
+                G.add_edge(bias_node, dest_node, weight=weight)
+                edge_labels[(bias_node, dest_node)] = f"{weight:.2f}"
+
+        plt.figure(figsize=(fig_width, fig_height))
+        nx.draw(
+            G,
+            pos=positions,
+            with_labels=True,
+            node_color=[node_colors[n] for n in G.nodes()],
+            edge_color="gray",
+            node_size=2000,
+            font_size=10,
+            font_weight="bold",
+            arrowsize=15,
+        )
+        nx.draw_networkx_edge_labels(G, pos=positions, edge_labels=edge_labels, font_size=8, label_pos=0.75)
+
+        plt.title("Feedforward Neural Network Graph", fontsize=14)
+        plt.show()
+
+
+    def save(self, filename):
+        try:
+            with open(filename, "wb") as f:
+                pickle.dump(self, f)
+            print(f" File Successfuly Saved to: '{filename}'")
+        except Exception as e:
+            print(f"Error: {e}")
+
+    @classmethod
+    def load(cls, filename):
+        if not os.path.exists(filename):
+            print(f"Error: File '{filename}' doesn't exist.")
+            return None
+        
+        try:
+            with open(filename, "rb") as f:
+                obj = pickle.load(f)
+            if isinstance(obj, cls):
+                print(f"Successfuly loaded '{filename}'")
+                return obj
+            else:
+                print(f"Error: Loaded object is not an instance of {cls.__name__}")
+                return None
+        except Exception as e:
+            print(f"Error loading object: {e}")
+            return None
