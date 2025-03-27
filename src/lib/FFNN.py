@@ -171,7 +171,7 @@ class FFNN:
                     node_name = f"O{i+1}"
                     color = "yellow"
                 else:
-                    node_name = f"H{layer_idx}{i+1}"
+                    node_name = f"H{layer_idx}_{i+1}"
                     color = "lightblue"
 
                 G.add_node(node_name)
@@ -189,19 +189,19 @@ class FFNN:
             for src in range(len(weight_matrix) - 1):
                 for dest in range(weight_matrix.shape[1]):
                     src_node = (
-                        f"i{src+1}" if layer_idx == 0 else f"h{layer_idx}{src+1}"
+                        f"I{src+1}" if layer_idx == 0 else f"H{layer_idx}_{src+1}"
                     )
                     dest_node = (
-                        f"h{layer_idx+1}{dest+1}" if layer_idx + 1 < num_layers - 1 else f"o{dest+1}"
+                        f"H{layer_idx+1}_{dest+1}" if layer_idx + 1 < num_layers - 1 else f"O{dest+1}"
                     )
                     weight = weight_matrix[src + 1, dest]
                     G.add_edge(src_node, dest_node, weight=weight)
                     edge_labels[(src_node, dest_node)] = f"{weight:.2f}"
 
             for dest in range(weight_matrix.shape[1]):
-                bias_node = f"b{layer_idx+1}"
+                bias_node = f"B{layer_idx+1}"
                 dest_node = (
-                    f"h{layer_idx+1}{dest+1}" if layer_idx + 1 < num_layers - 1 else f"o{dest+1}"
+                    f"H{layer_idx+1}_{dest+1}" if layer_idx + 1 < num_layers - 1 else f"O{dest+1}"
                 )
                 weight = weight_matrix[0, dest]
                 G.add_edge(bias_node, dest_node, weight=weight)
@@ -213,7 +213,7 @@ class FFNN:
             pos=positions,
             with_labels=True,
             node_color=[node_colors[n] for n in G.nodes()],
-            edge_color="gray",
+            edge_color="black",
             node_size=2000,
             font_size=10,
             font_weight="bold",
@@ -249,5 +249,5 @@ class FFNN:
                 print(f"Error: Loaded object is not an instance of {cls.__name__}")
                 return None
         except Exception as e:
-            print(f"Error loading object: {e}")
+            print(f"Error: {e}")
             return None
