@@ -224,6 +224,44 @@ class FFNN:
         plt.title("Feedforward Neural Network Graph", fontsize=14)
         plt.show()
 
+    def plot_weight_distribution(self, layers):
+
+        if not hasattr(self, 'weights'):
+            raise ValueError("Bobot belum diinisialisasi")
+
+        for layer in layers:
+            if layer < 0 or layer >= len(self.weights):
+                raise ValueError(f"Layer {layer} di luar jangkauan. Indeks layer harus antara 0 dan {len(self.weights) - 1}.")
+            
+            weights = self.weights[layer].flatten()
+            plt.figure(figsize=(8, 5))
+            plt.hist(weights, bins=30, alpha=0.7, color='b', edgecolor='black')
+            plt.xlabel("Nilai Bobot")
+            plt.ylabel("Frekuensi")
+            plt.title(f"Distribusi Bobot - Layer {layer}")
+            plt.grid(axis='y', linestyle='--', alpha=0.7)
+            plt.show()
+
+    def plot_gradient_distribution(self, layers):
+
+        if not hasattr(self, 'deltas'):
+            raise ValueError("Gradien belum tersedia")
+
+        for layer in layers:
+            if layer < 0 or layer >= len(self.deltas):
+                raise ValueError(f"Layer {layer} di luar jangkauan. Indeks layer harus antara 0 dan {len(self.deltas) - 1}.")
+            
+            gradients = self.deltas[layer].flatten()
+            plt.figure(figsize=(8, 5))
+            plt.hist(gradients, bins=30, alpha=0.7, color='r', edgecolor='black')
+            plt.xlabel("Nilai Gradien Bobot")
+            plt.ylabel("Frekuensi")
+            plt.title(f"Distribusi Gradien Bobot - Layer {layer}")
+            plt.grid(axis='y', linestyle='--', alpha=0.7)
+            plt.show()
+
+    # usage example : model.plot_gradient_distribution([0, 1])
+
 
     def save(self, filename):
         try:
