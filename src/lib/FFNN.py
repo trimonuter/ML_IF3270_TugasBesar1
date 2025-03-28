@@ -15,6 +15,7 @@ class FFNN:
         self.target = y_train
         self.learning_rate = learning_rate
         self.activations = activation_functions
+        self.loss_function = Loss.mse
 
         if activation_functions != None and len(activation_functions) != len(layer_neurons):
             raise ValueError("Number of activation functions must match number of layers")
@@ -29,8 +30,14 @@ class FFNN:
     def setLearningRate(self, learning_rate):
         self.learning_rate = learning_rate
 
+    def setLossFunction(self, loss_function):
+        self.loss_function = loss_function
+
     def setActivationUniform(self, activation_function):
         self.activations = [activation_function for i in range(len(self.layer_neurons))]
+
+    def setOutputActivation(self, activation_function):
+        self.activations[-1] = activation_function
 
     def setWeights(self, weights):
         self.weights = weights
@@ -83,7 +90,10 @@ class FFNN:
 
             if i == n:
                 # Output layer
-                delta = (current_target - output) * Activation.getDerivativeMatrix(self.activations[i], output)
+                if self.activations[i] == Activation.softmax:
+                    delta = current_target - output
+                else:
+                    delta = Loss.getErrorDerivativeMatrix(self.loss_function, current_target, output) * Activation.getDerivativeMatrix(self.activations[i], output)
             else:
                 # Hidden layer
                 weight_ds = Matrix.removeBiasRow(self.weights[i])           # Downstream weight (Wkj) matrix
