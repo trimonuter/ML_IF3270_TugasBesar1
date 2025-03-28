@@ -9,8 +9,6 @@ import dill as pickle
 import os
 
 class FFNN:
-    # Static attributes
-
     def __init__(self, layer_neurons, X_train, y_train, X_val, y_val, learning_rate, activation_functions=None):
         self.layer_neurons = layer_neurons
         self.input = X_train
@@ -110,8 +108,8 @@ class FFNN:
 
     def train(self, batch_size, learning_rate, epochs, verbose=True, printResults=False):
         self.setLearningRate(learning_rate)
-        training_loss_list = []
-        validation_loss_list = []
+        self.training_loss_list = []
+        self.validation_loss_list = []
 
         for epoch in range(epochs):
             training_loss = 0
@@ -130,11 +128,11 @@ class FFNN:
 
             # Calculate epoch loss
             training_loss /= len(self.input)
-            training_loss_list.append(training_loss)
+            self.training_loss_list.append(training_loss)
 
             self.FFNNForwardPropagation(self.X_val)
             validation_loss = Loss.mse(self.y_val, self.layer_results[-1])
-            validation_loss_list.append(validation_loss)
+            self.validation_loss_list.append(validation_loss)
 
             # Print epoch results
             if verbose:
@@ -144,7 +142,7 @@ class FFNN:
                     print(f"{Color.CYAN}     Prediction:\t{self.layer_results[-1]}")
                     print(f"{Color.MAGENTA}     Target:\t\t{self.target}{Color.RESET}")
 
-        return training_loss_list, validation_loss_list
+        return self.training_loss_list, self.validation_loss_list
 
     def printGraph(self):
         G = nx.DiGraph()
