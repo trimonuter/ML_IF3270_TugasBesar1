@@ -9,12 +9,14 @@ import dill as pickle
 import os
 
 class FFNN:
-    def __init__(self, layer_neurons, X_train, y_train, X_val, y_val, learning_rate, activation_functions=None):
+    def __init__(self, layer_neurons, X_train, y_train, X_val, y_val, learning_rate, l1_lambda = 0, l2_lambda = 0, activation_functions=None):
         self.layer_neurons = layer_neurons
         self.input = X_train
         self.target = y_train
         self.learning_rate = learning_rate
         self.activations = activation_functions
+        self.l1_lambda = l1_lambda
+        self.l2_lambda = l2_lambda
         self.loss_function = Loss.mse
 
         if activation_functions != None and len(activation_functions) != len(layer_neurons):
@@ -107,9 +109,14 @@ class FFNN:
             layer_input = Matrix.addBiasColumn(self.layer_results[i - 1])   # Input (Xji) matrix
             weight_change = self.learning_rate * (np.matmul(np.transpose(layer_input), delta))      # delta_w (n * delta_j * xji)
 
+            if self.l2_lambda > 0:
+                weight_change -= self.learning_rate * self.l2_lambda * self.weights[i - 1]
+            if self.l1_lambda > 0:
+                weight_change -= self.learning_rate * self.l1_lambda * np.sign(self.weights[i - 1])
+
             delta_weights = [weight_change] + delta_weights
 
-        # Set current epoch's gradient array
+        # Set current epoch's gradient array 
         self.deltas = deltas
 
         # Update old weights after backpropagation has finished
@@ -158,6 +165,7 @@ class FFNN:
         G = nx.DiGraph()
         positions = {}
         node_colors = {}
+        node_labels = {}
 
         layer_spacing = 3
         neuron_spacing = 1.5
@@ -185,12 +193,14 @@ class FFNN:
                 G.add_node(node_name)
                 positions[node_name] = (layer_idx * layer_spacing, y_start + i * neuron_spacing)
                 node_colors[node_name] = color
+                node_labels[node_name] = f"{node_name}"
 
             if layer_idx < num_layers - 1:
                 bias_node = f"B{layer_idx+1}"
                 G.add_node(bias_node)
                 positions[bias_node] = (layer_idx * layer_spacing, y_start - neuron_spacing)
                 node_colors[bias_node] = "lightgray"
+                node_labels[bias_node] = f"{bias_node}"
 
         edge_labels = {}
         for layer_idx, weight_matrix in enumerate(self.weights):
@@ -220,6 +230,7 @@ class FFNN:
             G,
             pos=positions,
             with_labels=True,
+            labels=node_labels,
             node_color=[node_colors[n] for n in G.nodes()],
             edge_color="black",
             node_size=2000,
@@ -227,10 +238,27 @@ class FFNN:
             font_weight="bold",
             arrowsize=15,
         )
+        
+        for node_name, (x, y) in positions.items():
+            if node_name.startswith("I") or node_name.startswith("B"):  
+                continue 
+
+            if node_name.startswith("H"):
+                layer_idx = int(node_name.split("_")[0][1:]) - 1 
+            elif node_name.startswith("O"):
+                layer_idx = len(self.layer_neurons) - 2
+
+            neuron_idx = int(node_name.split("_")[1]) - 1 if "_" in node_name else int(node_name[1]) - 1
+
+            if layer_idx < len(self.deltas) and neuron_idx < self.deltas[layer_idx].shape[1]:  
+                delta_value = self.deltas[layer_idx][0, neuron_idx]  
+                plt.text(x, y + 0.25, f"Δ={delta_value:.5f}", fontsize=9, ha="center", color="green") 
+
         nx.draw_networkx_edge_labels(G, pos=positions, edge_labels=edge_labels, font_size=8, label_pos=0.75)
 
         plt.title("Feedforward Neural Network Graph", fontsize=14)
         plt.show()
+
 
     def plot_weight_distribution(self, layers):
 
@@ -267,9 +295,6 @@ class FFNN:
             plt.title(f"Distribusi Gradien Bobot - Layer {layer}")
             plt.grid(axis='y', linestyle='--', alpha=0.7)
             plt.show()
-
-    # usage example : model.plot_gradient_distribution([0, 1])
-
 
     def save(self, filename):
         try:
