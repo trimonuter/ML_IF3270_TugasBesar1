@@ -9,12 +9,14 @@ import dill as pickle
 import os
 
 class FFNN:
-    def __init__(self, layer_neurons, X_train, y_train, X_val, y_val, learning_rate, activation_functions=None):
+    def __init__(self, layer_neurons, X_train, y_train, X_val, y_val, learning_rate, l1_lambda = 0, l2_lambda = 0, activation_functions=None):
         self.layer_neurons = layer_neurons
         self.input = X_train
         self.target = y_train
         self.learning_rate = learning_rate
         self.activations = activation_functions
+        self.l1_lambda = l1_lambda
+        self.l2_lambda = l2_lambda
         self.loss_function = Loss.mse
 
         if activation_functions != None and len(activation_functions) != len(layer_neurons):
@@ -107,9 +109,14 @@ class FFNN:
             layer_input = Matrix.addBiasColumn(self.layer_results[i - 1])   # Input (Xji) matrix
             weight_change = self.learning_rate * (np.matmul(np.transpose(layer_input), delta))      # delta_w (n * delta_j * xji)
 
+            if self.l2_lambda > 0:
+                weight_change -= self.learning_rate * self.l2_lambda * self.weights[i - 1]
+            if self.l1_lambda > 0:
+                weight_change -= self.learning_rate * self.l1_lambda * np.sign(self.weights[i - 1])
+
             delta_weights = [weight_change] + delta_weights
 
-        # Set current epoch's gradient array
+        # Set current epoch's gradient array 
         self.deltas = deltas
 
         # Update old weights after backpropagation has finished
@@ -288,9 +295,6 @@ class FFNN:
             plt.title(f"Distribusi Gradien Bobot - Layer {layer}")
             plt.grid(axis='y', linestyle='--', alpha=0.7)
             plt.show()
-
-    # usage example : model.plot_gradient_distribution([0, 1])
-
 
     def save(self, filename):
         try:
