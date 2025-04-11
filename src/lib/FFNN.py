@@ -9,14 +9,13 @@ import dill as pickle
 import os
 
 class FFNN:
-    # Static attributes
-
     def __init__(self, layer_neurons, X_train, y_train, X_val, y_val, learning_rate, activation_functions=None):
         self.layer_neurons = layer_neurons
         self.input = X_train
         self.target = y_train
         self.learning_rate = learning_rate
         self.activations = activation_functions
+        self.loss_function = Loss.mse
 
         if activation_functions != None and len(activation_functions) != len(layer_neurons):
             raise ValueError("Number of activation functions must match number of layers")
@@ -31,8 +30,14 @@ class FFNN:
     def setLearningRate(self, learning_rate):
         self.learning_rate = learning_rate
 
+    def setLossFunction(self, loss_function):
+        self.loss_function = loss_function
+
     def setActivationUniform(self, activation_function):
         self.activations = [activation_function for i in range(len(self.layer_neurons))]
+
+    def setOutputActivation(self, activation_function):
+        self.activations[-1] = activation_function
 
     def setWeights(self, weights):
         self.weights = weights
@@ -85,7 +90,10 @@ class FFNN:
 
             if i == n:
                 # Output layer
-                delta = (current_target - output) * Activation.getDerivativeMatrix(self.activations[i], output)
+                if self.activations[i] == Activation.softmax:
+                    delta = current_target - output
+                else:
+                    delta = Loss.getErrorDerivativeMatrix(self.loss_function, current_target, output) * Activation.getDerivativeMatrix(self.activations[i], output)
             else:
                 # Hidden layer
                 weight_ds = Matrix.removeBiasRow(self.weights[i])           # Downstream weight (Wkj) matrix
@@ -110,8 +118,8 @@ class FFNN:
 
     def train(self, batch_size, learning_rate, epochs, verbose=True, printResults=False):
         self.setLearningRate(learning_rate)
-        training_loss_list = []
-        validation_loss_list = []
+        self.training_loss_list = []
+        self.validation_loss_list = []
 
         for epoch in range(epochs):
             training_loss = 0
@@ -130,11 +138,11 @@ class FFNN:
 
             # Calculate epoch loss
             training_loss /= len(self.input)
-            training_loss_list.append(training_loss)
+            self.training_loss_list.append(training_loss)
 
             self.FFNNForwardPropagation(self.X_val)
             validation_loss = Loss.mse(self.y_val, self.layer_results[-1])
-            validation_loss_list.append(validation_loss)
+            self.validation_loss_list.append(validation_loss)
 
             # Print epoch results
             if verbose:
@@ -144,7 +152,7 @@ class FFNN:
                     print(f"{Color.CYAN}     Prediction:\t{self.layer_results[-1]}")
                     print(f"{Color.MAGENTA}     Target:\t\t{self.target}{Color.RESET}")
 
-        return training_loss_list, validation_loss_list
+        return self.training_loss_list, self.validation_loss_list
 
     def printGraph(self):
         G = nx.DiGraph()

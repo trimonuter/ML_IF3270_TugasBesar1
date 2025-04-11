@@ -17,7 +17,7 @@ X = np.array([[0.05, 0.10]])
 target = np.array([[0.01, 0.99]])
 
 model = FFNN.FFNN([2, 2, 2], X, target, X, target, 0.5)
-model.setActivationUniform(Activation.sigmoid)
+model.setActivationUniform(Activation.linear)
 model.setWeights(network)
 
-model.train(batch_size=32, learning_rate=model.learning_rate, epochs=1000, printResults=True)
+model.train(batch_size=32, learning_rate=model.learning_rate, epochs=10, printResults=True)

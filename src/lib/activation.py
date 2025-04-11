@@ -40,6 +40,14 @@ def getDerivativeMatrix(activation, matrix):
     elif activation == tanh:
         return derivative_tanh(matrix)
     elif activation == softmax:
-        pass
+        n = matrix.shape[1]
+        derivative = np.zeros((n, n))
+        for i in range(n):
+            for j in range(n):
+                if i == j:
+                    derivative[i][j] = matrix[0][i] * (1 - matrix[0][i])
+                else:
+                    derivative[i][j] = -matrix[0][i] * matrix[0][j]
+        return derivative
     else:
         raise ValueError("Activation function not recognized")
